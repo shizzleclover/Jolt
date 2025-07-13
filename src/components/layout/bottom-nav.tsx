@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, Home, PlusCircle, User } from 'lucide-react';
+import { BarChart3, Home, PlusCircle, User, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/tracking', label: 'Tracking', icon: BarChart3 },
   { href: '/create', label: 'Create', icon: PlusCircle, isCentral: true },
+  { href: '/multiplayer', label: 'Friends', icon: Users },
   { href: '/profile', label: 'Profile', icon: User },
 ];
 
@@ -30,8 +31,8 @@ export default function BottomNav() {
               )}
             >
               {item.isCentral ? (
-                <div className="flex size-14 -translate-y-4 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
-                  <item.icon className="size-7" />
+                <div className="flex size-16 -translate-y-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg border-4 border-background">
+                  <item.icon className="size-8" />
                 </div>
               ) : (
                 <>

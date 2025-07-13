@@ -26,9 +26,9 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/hooks/use-toast"
-import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Upload } from "lucide-react"
+import { Moon, Sun, Upload } from "lucide-react"
+import { useTheme } from "next-themes"
 
 const profileFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -45,10 +45,11 @@ const notificationsFormSchema = z.object({
 
 const displayFormSchema = z.object({
   theme: z.enum(["light", "dark", "system"]),
-  font: z.enum(["inter", "manrope", "system"]),
 })
 
 export default function SettingsPage() {
+  const { theme, setTheme } = useTheme();
+
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -70,8 +71,7 @@ export default function SettingsPage() {
   const displayForm = useForm<z.infer<typeof displayFormSchema>>({
     resolver: zodResolver(displayFormSchema),
     defaultValues: {
-      theme: "light",
-      font: "inter",
+      theme: (theme as "light" | "dark" | "system") || "system",
     },
   })
 
@@ -90,6 +90,7 @@ export default function SettingsPage() {
   }
 
   function onDisplaySubmit(data: z.infer<typeof displayFormSchema>) {
+    setTheme(data.theme);
     toast({
       title: "Display settings updated",
       description: "Your display preferences have been saved.",
@@ -184,18 +185,24 @@ export default function SettingsPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Theme</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a theme" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="dark">Dark</SelectItem>
-                        <SelectItem value="system">System</SelectItem>
-                      </SelectContent>
-                    </Select>
+                     <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant={field.value === 'light' ? 'default' : 'outline'}
+                        onClick={() => field.onChange('light')}
+                        className="flex-1"
+                      >
+                        <Sun className="mr-2 size-4" /> Light
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={field.value === 'dark' ? 'default' : 'outline'}
+                        onClick={() => field.onChange('dark')}
+                        className="flex-1"
+                      >
+                        <Moon className="mr-2 size-4" /> Dark
+                      </Button>
+                    </div>
                     <FormDescription>
                       Select the theme for the dashboard.
                     </FormDescription>

@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BadgeCheck, Calendar, Edit, Shield, Star, Trophy } from "lucide-react";
+import { BadgeCheck, Calendar, Edit, Flame, Shield, Trophy } from "lucide-react";
 import Link from "next/link";
 import ActivityHeatmap from "@/components/dashboard/activity-heatmap";
 
@@ -11,12 +11,12 @@ export default function ProfilePage() {
         name: "Alex Doe",
         email: "alex.doe@jolt.app",
         avatar: "https://placehold.co/128x128",
-        joinDate: "Joined on March 15, 2024",
+        joinDate: "March 15, 2024",
     };
 
     const stats = [
         { label: "Quizzes Taken", value: "124", icon: <Trophy className="size-6 text-yellow-500" /> },
-        { label: "Current Streak", value: "12 Days", icon: <Star className="size-6 text-orange-400" /> },
+        { label: "Current Streak", value: "12 Days", icon: <Flame className="size-6 text-orange-400" /> },
         { label: "Joined", value: "3 Months Ago", icon: <Calendar className="size-6 text-blue-400" /> },
     ];
 
@@ -27,10 +27,11 @@ export default function ProfilePage() {
                 <p className="text-muted-foreground mt-2">Manage your account and track your progress.</p>
             </header>
 
-            <Card>
-                <CardHeader>
-                    <div className="flex flex-col items-center gap-6 sm:flex-row">
-                        <Avatar className="h-24 w-24 border-4 border-primary/20">
+            <Card className="overflow-hidden">
+                <CardHeader className="p-0">
+                    <div className="bg-muted h-24" />
+                    <div className="flex flex-col items-center gap-4 p-6 -mt-16 sm:flex-row sm:items-end sm:-mt-12">
+                        <Avatar className="h-28 w-28 border-4 border-background bg-background">
                             <AvatarImage src={user.avatar} alt={user.name} data-ai-hint="profile picture" />
                             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                         </Avatar>
@@ -39,9 +40,8 @@ export default function ProfilePage() {
                                 {user.name} <BadgeCheck className="size-6 text-blue-500" />
                             </CardTitle>
                             <CardDescription className="mt-1">{user.email}</CardDescription>
-                            <p className="text-sm text-muted-foreground mt-2">{user.joinDate}</p>
                         </div>
-                        <Button variant="outline" asChild>
+                        <Button variant="outline" className="w-full sm:w-auto" asChild>
                            <Link href="/settings"><Edit className="mr-2 size-4"/> Edit Profile</Link>
                         </Button>
                     </div>
@@ -49,7 +49,7 @@ export default function ProfilePage() {
                 <Separator />
                 <CardContent className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
                     {stats.map(stat => (
-                        <div key={stat.label} className="flex flex-col items-center gap-2 rounded-lg bg-muted/50 p-4">
+                        <div key={stat.label} className="flex flex-col items-center gap-2 rounded-lg bg-muted/50 p-4 border">
                              {stat.icon}
                             <p className="text-2xl font-bold">{stat.value}</p>
                             <p className="text-sm text-muted-foreground">{stat.label}</p>

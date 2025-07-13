@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, PlusCircle, Sparkles, Star } from "lucide-react";
+import { FileText, Sparkles, Star } from "lucide-react";
 import Link from "next/link";
 import PerformanceChart from "@/components/dashboard/performance-chart";
 import ActivityHeatmap from "@/components/dashboard/activity-heatmap";
