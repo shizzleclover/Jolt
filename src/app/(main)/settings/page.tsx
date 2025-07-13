@@ -17,13 +17,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -88,14 +81,16 @@ export default function SettingsPage() {
       description: "Your notification preferences have been saved.",
     })
   }
-
-  function onDisplaySubmit(data: z.infer<typeof displayFormSchema>) {
-    setTheme(data.theme);
+  
+  const handleThemeChange = (newTheme: "light" | "dark") => {
+    setTheme(newTheme);
+    displayForm.setValue("theme", newTheme);
     toast({
-      title: "Display settings updated",
+      title: `Theme changed to ${newTheme.charAt(0).toUpperCase() + newTheme.slice(1)}`,
       description: "Your display preferences have been saved.",
-    })
+    });
   }
+
 
   return (
     <div className="flex flex-col gap-8 pb-16 md:pb-8">
@@ -178,7 +173,7 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <Form {...displayForm}>
-            <form onSubmit={displayForm.handleSubmit(onDisplaySubmit)} className="space-y-8">
+            <form className="space-y-8">
               <FormField
                 control={displayForm.control}
                 name="theme"
@@ -188,16 +183,16 @@ export default function SettingsPage() {
                      <div className="flex gap-2">
                       <Button
                         type="button"
-                        variant={field.value === 'light' ? 'default' : 'outline'}
-                        onClick={() => field.onChange('light')}
+                        variant={theme === 'light' ? 'default' : 'outline'}
+                        onClick={() => handleThemeChange('light')}
                         className="flex-1"
                       >
                         <Sun className="mr-2 size-4" /> Light
                       </Button>
                       <Button
                         type="button"
-                        variant={field.value === 'dark' ? 'default' : 'outline'}
-                        onClick={() => field.onChange('dark')}
+                        variant={theme === 'dark' ? 'default' : 'outline'}
+                        onClick={() => handleThemeChange('dark')}
                         className="flex-1"
                       >
                         <Moon className="mr-2 size-4" /> Dark
@@ -210,7 +205,6 @@ export default function SettingsPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Update display</Button>
             </form>
           </Form>
         </CardContent>

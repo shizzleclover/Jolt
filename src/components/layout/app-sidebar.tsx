@@ -43,11 +43,11 @@ export default function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar className="border-r hidden md:flex">
+    <Sidebar>
       <SidebarHeader>
         <Logo />
       </SidebarHeader>
-      <SidebarContent className="p-4 flex-grow">
+      <SidebarContent>
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
@@ -66,8 +66,8 @@ export default function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarSeparator />
-      <SidebarFooter className="p-4">
+      <SidebarFooter>
+         <SidebarSeparator />
          <SidebarMenu>
             {bottomMenuItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
