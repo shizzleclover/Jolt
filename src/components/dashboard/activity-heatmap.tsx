@@ -3,6 +3,7 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { endOfWeek, startOfWeek, eachDayOfInterval, format, startOfYear, getDay } from 'date-fns';
+import { useState, useEffect } from "react";
 
 const generateDummyData = () => {
   const data = [];
@@ -19,14 +20,10 @@ const generateDummyData = () => {
   return data;
 };
 
-const data = generateDummyData();
-const activityByDate = new Map(data.map(item => [item.date, item.count]));
-
 const today = new Date();
 const weekStartsOn = 1; // Monday
 const start = startOfWeek(startOfYear(today), { weekStartsOn });
 const end = endOfWeek(today, { weekStartsOn });
-
 const days = eachDayOfInterval({ start, end });
 
 const weeks: Date[][] = [];
@@ -34,7 +31,10 @@ let currentWeek: Date[] = [];
 
 days.forEach((day, i) => {
     if (i > 0 && getDay(day) === weekStartsOn) {
-        weeks.push(currentWeek);
+        // Adjust for weeks that start on a different day than the locale default
+        if (currentWeek.length > 0) {
+            weeks.push(currentWeek);
+        }
         currentWeek = [];
     }
     currentWeek.push(day);
@@ -42,6 +42,7 @@ days.forEach((day, i) => {
 if (currentWeek.length > 0) {
     weeks.push(currentWeek);
 }
+
 
 const weekDays = ['Mon', 'Wed', 'Fri'];
 const monthLabels = [
@@ -58,6 +59,20 @@ const getColorClass = (count: number | undefined) => {
 };
 
 export default function ActivityHeatmap() {
+    const [activityByDate, setActivityByDate] = useState<Map<string, number>>(new Map());
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        const data = generateDummyData();
+        setActivityByDate(new Map(data.map(item => [item.date, item.count])));
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        // Render a placeholder or skeleton while waiting for the client-side mount
+        return <div className="h-[120px] w-full animate-pulse rounded-md bg-muted" />;
+    }
+    
     return (
         <TooltipProvider>
             <div className="flex flex-col gap-2 overflow-x-auto p-1">
@@ -78,8 +93,11 @@ export default function ActivityHeatmap() {
                         {weeks.map((week, weekIndex) => (
                             <div key={weekIndex} className="grid grid-flow-row gap-1">
                                 {Array.from({ length: 7 }).map((_, dayIndex) => {
-                                    const dateInWeek = week.find(d => getDay(d) === (dayIndex + weekStartsOn) % 7);
-                                    if (!dateInWeek) return <div key={dayIndex} className="size-3.5 rounded-sm" />;
+                                    // Calculate the day of the week, starting from Monday (1)
+                                    const dayOfWeek = (dayIndex + weekStartsOn) % 7;
+                                    const dateInWeek = week.find(d => getDay(d) === (dayOfWeek === 0 ? 0 : dayOfWeek));
+
+                                    if (!dateInWeek || dateInWeek > today) return <div key={dayIndex} className="size-3.5 rounded-sm bg-muted/20" />;
                                     
                                     const dateStr = format(dateInWeek, 'yyyy-MM-dd');
                                     const activityCount = activityByDate.get(dateStr);

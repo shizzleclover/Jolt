@@ -74,19 +74,19 @@ export default function ProfilePage() {
                     <CardDescription>Manage your security settings.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="flex flex-col items-start gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p className="font-semibold">Password</p>
                             <p className="text-sm text-muted-foreground">Last changed 3 months ago</p>
                         </div>
-                        <Button variant="outline">Change Password</Button>
+                        <Button variant="outline" className="w-full sm:w-auto">Change Password</Button>
                     </div>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="flex flex-col items-start gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p className="font-semibold">Two-Factor Authentication</p>
                             <p className="text-sm text-muted-foreground">Keep your account extra secure.</p>
                         </div>
-                        <Button variant="outline">Enable 2FA</Button>
+                        <Button variant="outline" className="w-full sm:w-auto">Enable 2FA</Button>
                     </div>
                 </CardContent>
             </Card>
