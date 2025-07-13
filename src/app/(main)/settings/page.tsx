@@ -17,7 +17,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
 import { toast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Moon, Sun, Upload } from "lucide-react"
@@ -27,13 +26,6 @@ const profileFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email(),
   avatar: z.any(),
-})
-
-const notificationsFormSchema = z.object({
-  communicationEmails: z.boolean().default(false),
-  marketingEmails: z.boolean().default(false),
-  socialEmails: z.boolean().default(true),
-  securityEmails: z.boolean().default(true),
 })
 
 const displayFormSchema = z.object({
@@ -51,16 +43,6 @@ export default function SettingsPage() {
     },
   })
 
-  const notificationsForm = useForm<z.infer<typeof notificationsFormSchema>>({
-    resolver: zodResolver(notificationsFormSchema),
-    defaultValues: {
-      communicationEmails: false,
-      marketingEmails: false,
-      socialEmails: true,
-      securityEmails: true,
-    },
-  })
-
   const displayForm = useForm<z.infer<typeof displayFormSchema>>({
     resolver: zodResolver(displayFormSchema),
     defaultValues: {
@@ -75,13 +57,6 @@ export default function SettingsPage() {
     })
   }
 
-  function onNotificationsSubmit(data: z.infer<typeof notificationsFormSchema>) {
-    toast({
-      title: "Notifications updated",
-      description: "Your notification preferences have been saved.",
-    })
-  }
-  
   const handleThemeChange = (newTheme: "light" | "dark") => {
     setTheme(newTheme);
     displayForm.setValue("theme", newTheme);
@@ -97,7 +72,7 @@ export default function SettingsPage() {
       <header>
         <h1 className="text-4xl font-bold font-headline">Settings</h1>
         <p className="text-muted-foreground mt-2">
-          Manage your account settings and set e-mail preferences.
+          Manage your account settings and preferences.
         </p>
       </header>
 
@@ -205,69 +180,6 @@ export default function SettingsPage() {
                   </FormItem>
                 )}
               />
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Notifications</CardTitle>
-          <CardDescription>
-            Configure how you receive notifications.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...notificationsForm}>
-            <form onSubmit={notificationsForm.handleSubmit(onNotificationsSubmit)} className="space-y-8">
-                <div className="space-y-4">
-                  <FormField
-                    control={notificationsForm.control}
-                    name="communicationEmails"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
-                            Communication emails
-                          </FormLabel>
-                          <FormDescription>
-                            Receive emails about your account activity.
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={notificationsForm.control}
-                    name="marketingEmails"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
-                            Marketing emails
-                          </FormLabel>
-                          <FormDescription>
-                            Receive emails about new products, features, and more.
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              <Button type="submit">Update notifications</Button>
             </form>
           </Form>
         </CardContent>

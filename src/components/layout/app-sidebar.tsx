@@ -58,8 +58,10 @@ export default function AppSidebar() {
               >
                 <Link href={item.href}>
                   <item.icon className="size-5" />
-                  <span className="flex-1">{item.label}</span>
-                  {item.isNew && <Badge variant="secondary">New</Badge>}
+                  <span className="flex-1">
+                    {item.label}
+                    {item.isNew && <Badge variant="secondary" className="ml-2">New</Badge>}
+                  </span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -79,7 +81,7 @@ export default function AppSidebar() {
                 >
                     <Link href={item.href}>
                     <item.icon className="size-5" />
-                    {item.label}
+                    <span>{item.label}</span>
                     </Link>
                 </SidebarMenuButton>
                 </SidebarMenuItem>
