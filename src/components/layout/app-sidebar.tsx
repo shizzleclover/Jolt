@@ -55,12 +55,13 @@ export default function AppSidebar() {
                 asChild
                 isActive={pathname.startsWith(item.href)}
                 className="justify-start"
+                tooltip={item.label}
               >
                 <Link href={item.href}>
                   <item.icon className="size-5" />
-                  <span className="flex-1">
+                  <span className="flex flex-1 items-center justify-between">
                     {item.label}
-                    {item.isNew && <Badge variant="secondary" className="ml-2">New</Badge>}
+                    {item.isNew && <Badge variant="secondary">New</Badge>}
                   </span>
                 </Link>
               </SidebarMenuButton>
@@ -78,6 +79,7 @@ export default function AppSidebar() {
                     isActive={pathname.startsWith(item.href)}
                     variant="ghost"
                     className="justify-start"
+                    tooltip={item.label}
                 >
                     <Link href={item.href}>
                     <item.icon className="size-5" />

@@ -1,9 +1,10 @@
 "use client"
 
 import * as React from "react"
+import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import { PanelLeft, X } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -175,7 +176,8 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, openMobile, setOpenMobile } = useSidebar()
+    const { state } = useSidebar()
 
     if (collapsible === "none") {
       return (
@@ -196,16 +198,18 @@ const Sidebar = React.forwardRef<
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
           <SheetContent
-            data-sidebar="sidebar"
-            data-mobile="true"
-            className="flex w-[--sidebar-width] flex-col bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            side={side}
+            className="w-[--sidebar-width-mobile] bg-background p-0"
             style={
               {
-                "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+                "--sidebar-width-mobile": SIDEBAR_WIDTH_MOBILE,
               } as React.CSSProperties
             }
-            side={side}
           >
+            <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </SheetPrimitive.Close>
             <SheetTitle className="sr-only">Sidebar Menu</SheetTitle>
             {children}
           </SheetContent>
@@ -217,10 +221,12 @@ const Sidebar = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-            "group/sidebar peer hidden h-screen flex-col border-r md:flex",
-            state === 'expanded' ? 'w-[var(--sidebar-width)]' : 'w-[var(--sidebar-width-icon)]',
-            "transition-all duration-300 ease-in-out",
-            className
+          "group/sidebar peer hidden h-screen flex-col border-r bg-background md:flex",
+          state === "expanded"
+            ? "w-[var(--sidebar-width)]"
+            : "w-[var(--sidebar-width-icon)]",
+          "transition-all duration-300 ease-in-out",
+          className
         )}
         data-state={state}
         {...props}
@@ -327,15 +333,15 @@ const SidebarHeader = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-  const { state } = useSidebar();
+  const { state } = useSidebar()
   return (
     <div
       ref={ref}
       data-sidebar="header"
       className={cn(
-          "flex items-center p-4",
-          state === 'collapsed' && 'justify-center',
-          className
+        "flex h-16 items-center p-4",
+        state === "collapsed" && "justify-center",
+        className
       )}
       {...props}
     />
@@ -381,10 +387,7 @@ const SidebarContent = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="content"
-      className={cn(
-        "flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-4",
-        className
-      )}
+      className={cn("flex min-h-0 flex-1 flex-col overflow-auto", className)}
       {...props}
     />
   )
@@ -470,7 +473,7 @@ const SidebarMenu = React.forwardRef<
   <ul
     ref={ref}
     data-sidebar="menu"
-    className={cn("flex w-full min-w-0 flex-col gap-1", className)}
+    className={cn("flex w-full min-w-0 flex-col gap-1 p-2", className)}
     {...props}
   />
 ))
@@ -528,31 +531,42 @@ const SidebarMenuButton = React.forwardRef<
       size = "default",
       tooltip,
       className,
+      children,
       ...props
     },
     ref
   ) => {
     const Comp = asChild ? Slot : "button"
     const { isMobile, state } = useSidebar()
-    const { children, ...rest } = props;
 
-    const buttonContent = (
-      <span className={cn(state === 'collapsed' ? 'sr-only' : 'flex-1')}>
-        {children}
-      </span>
-    );
-    
+    const renderChildren = () => {
+      if (state === "collapsed" && !isMobile) {
+        // Find the icon among children
+        const icon = React.Children.toArray(children).find(
+          (child) =>
+            React.isValidElement(child) &&
+            (child.props.className?.includes("size-") ||
+              child.type?.displayName?.toLowerCase().includes("icon"))
+        )
+        return icon || null
+      }
+      return children
+    }
+
     const button = (
       <Comp
         ref={ref}
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), state === 'collapsed' && 'justify-center', className)}
-        {...rest}
+        className={cn(
+          sidebarMenuButtonVariants({ variant, size }),
+          state === "collapsed" && "justify-center",
+          className
+        )}
+        {...props}
       >
-        {props.children && React.Children.toArray(props.children).find(child => React.isValidElement(child) && child.props.className?.includes('size-5'))}
-        {state === 'expanded' && buttonContent}
+        {renderChildren()}
       </Comp>
     )
 
