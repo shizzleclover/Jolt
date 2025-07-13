@@ -4,6 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,6 +22,7 @@ import { toast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Moon, Sun, Upload } from "lucide-react"
 import { useTheme } from "next-themes"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const profileFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -34,6 +36,12 @@ const displayFormSchema = z.object({
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
@@ -45,10 +53,14 @@ export default function SettingsPage() {
 
   const displayForm = useForm<z.infer<typeof displayFormSchema>>({
     resolver: zodResolver(displayFormSchema),
-    defaultValues: {
-      theme: (theme as "light" | "dark" | "system") || "system",
-    },
   })
+
+  useEffect(() => {
+    if (theme) {
+        displayForm.setValue("theme", (theme as "light" | "dark" | "system"));
+    }
+  }, [theme, displayForm]);
+
 
   function onProfileSubmit(data: z.infer<typeof profileFormSchema>) {
     toast({
@@ -59,11 +71,6 @@ export default function SettingsPage() {
 
   const handleThemeChange = (newTheme: "light" | "dark") => {
     setTheme(newTheme);
-    displayForm.setValue("theme", newTheme);
-    toast({
-      title: `Theme changed to ${newTheme.charAt(0).toUpperCase() + newTheme.slice(1)}`,
-      description: "Your display preferences have been saved.",
-    });
   }
 
 
@@ -156,22 +163,31 @@ export default function SettingsPage() {
                   <FormItem>
                     <FormLabel>Theme</FormLabel>
                      <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant={theme === 'light' ? 'default' : 'outline'}
-                        onClick={() => handleThemeChange('light')}
-                        className="flex-1"
-                      >
-                        <Sun className="mr-2 size-4" /> Light
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={theme === 'dark' ? 'default' : 'outline'}
-                        onClick={() => handleThemeChange('dark')}
-                        className="flex-1"
-                      >
-                        <Moon className="mr-2 size-4" /> Dark
-                      </Button>
+                      {!isMounted ? (
+                        <>
+                          <Skeleton className="h-10 flex-1" />
+                          <Skeleton className="h-10 flex-1" />
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            type="button"
+                            variant={theme === 'light' ? 'default' : 'outline'}
+                            onClick={() => handleThemeChange('light')}
+                            className="flex-1"
+                          >
+                            <Sun className="mr-2 size-4" /> Light
+                          </Button>
+                          <Button
+                            type="button"
+                            variant={theme === 'dark' ? 'default' : 'outline'}
+                            onClick={() => handleThemeChange('dark')}
+                            className="flex-1"
+                          >
+                            <Moon className="mr-2 size-4" /> Dark
+                          </Button>
+                        </>
+                      )}
                     </div>
                     <FormDescription>
                       Select the theme for the dashboard.
