@@ -29,17 +29,17 @@ export default function ProfilePage() {
 
             <Card className="overflow-hidden">
                 <CardHeader className="p-0">
-                    <div className="bg-muted h-24" />
-                    <div className="flex flex-col items-center gap-4 p-6 -mt-16 sm:flex-row sm:items-end sm:-mt-12">
-                        <Avatar className="h-28 w-28 border-4 border-background bg-background">
+                    <div className="bg-muted h-20 sm:h-24" />
+                    <div className="flex flex-col items-center gap-4 p-4 text-center sm:flex-row sm:text-left sm:p-6 -mt-14 sm:-mt-12">
+                        <Avatar className="h-24 w-24 border-4 border-background bg-background sm:h-28 sm:w-28">
                             <AvatarImage src={user.avatar} alt={user.name} data-ai-hint="profile picture" />
                             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <div className="flex-1 text-center sm:text-left">
-                            <CardTitle className="text-3xl font-headline flex items-center gap-2 justify-center sm:justify-start">
-                                {user.name} <BadgeCheck className="size-6 text-blue-500" />
+                        <div className="flex-1 space-y-1">
+                            <CardTitle className="text-2xl font-headline flex items-center gap-2 justify-center sm:justify-start">
+                                {user.name} <BadgeCheck className="size-5 text-blue-500" />
                             </CardTitle>
-                            <CardDescription className="mt-1">{user.email}</CardDescription>
+                            <CardDescription>{user.email}</CardDescription>
                         </div>
                         <Button variant="outline" className="w-full sm:w-auto" asChild>
                            <Link href="/settings"><Edit className="mr-2 size-4"/> Edit Profile</Link>
@@ -47,7 +47,7 @@ export default function ProfilePage() {
                     </div>
                 </CardHeader>
                 <Separator />
-                <CardContent className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+                <CardContent className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                     {stats.map(stat => (
                         <div key={stat.label} className="flex flex-col items-center gap-2 rounded-lg bg-muted/50 p-4 border">
                              {stat.icon}
