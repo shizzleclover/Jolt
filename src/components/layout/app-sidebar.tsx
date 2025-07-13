@@ -37,24 +37,24 @@ const menuItems = [
 const bottomMenuItems = [
   { href: '/profile', label: 'Profile', icon: User },
   { href: '/settings', label: 'Settings', icon: Settings },
-  { href: '#', label: 'Logout', icon: LogOut },
+  { href: '/login', label: 'Logout', icon: LogOut },
 ]
 
 export default function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar className="border-r">
+    <Sidebar className="border-r hidden md:flex">
       <SidebarHeader>
         <Logo />
       </SidebarHeader>
-      <SidebarContent className="p-4">
+      <SidebarContent className="p-4 flex-grow">
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
-                isActive={pathname === item.href}
+                isActive={pathname.startsWith(item.href)}
                 className="justify-start"
               >
                 <Link href={item.href}>
@@ -69,22 +69,12 @@ export default function AppSidebar() {
       </SidebarContent>
       <SidebarSeparator />
       <SidebarFooter className="p-4">
-        <div className="flex items-center gap-3">
-            <Avatar>
-                <AvatarImage src="https://placehold.co/40x40" alt="@username" />
-                <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-                <span className="font-semibold">User Name</span>
-                <span className="text-sm text-muted-foreground">user@jolt.app</span>
-            </div>
-        </div>
-         <SidebarMenu className="mt-4">
+         <SidebarMenu>
             {bottomMenuItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.href}
+                    isActive={pathname.startsWith(item.href)}
                     variant="ghost"
                     className="justify-start"
                 >

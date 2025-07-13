@@ -3,9 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FileText, PlusCircle, Sparkles, Star } from "lucide-react";
 import Link from "next/link";
 import PerformanceChart from "@/components/dashboard/performance-chart";
+import ActivityHeatmap from "@/components/dashboard/activity-heatmap";
 
 export default function DashboardPage() {
-    // Placeholder data
     const recentQuizzes = [
         { id: 1, title: "Biology: Cell Structure", score: "8/10", date: "2d ago" },
         { id: 2, title: "History: The Roman Empire", score: "9/10", date: "4d ago" },
@@ -15,7 +15,7 @@ export default function DashboardPage() {
     const username = "Alex";
 
     return (
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 pb-16 md:pb-8">
             <header>
                 <h1 className="text-3xl font-bold font-headline">Welcome back, {username}!</h1>
                 <p className="text-muted-foreground">Ready to jolt your memory? Let's get learning.</p>
@@ -38,11 +38,11 @@ export default function DashboardPage() {
                 </Card>
                 <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle className="font-headline">Performance Overview</CardTitle>
-                        <CardDescription>Your quiz scores over the last 7 days.</CardDescription>
+                        <CardTitle className="font-headline">Activity</CardTitle>
+                        <CardDescription>Your learning consistency over the last year.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <PerformanceChart />
+                        <ActivityHeatmap />
                     </CardContent>
                 </Card>
             </div>
@@ -64,7 +64,7 @@ export default function DashboardPage() {
                                     <div className="flex items-center gap-4">
                                         <p className="font-semibold text-lg">{quiz.score}</p>
                                         <Button variant="outline" size="sm" asChild>
-                                            <Link href={`/quiz/${quiz.id}/results`}>Review</Link>
+                                            <Link href={`/quiz/${quiz.id}`}>Review</Link>
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -73,17 +73,15 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <div>
-                    <h2 className="text-2xl font-bold font-headline mb-4">Get Started</h2>
+                 <div className="lg:col-span-1">
+                    <h2 className="text-2xl font-bold font-headline mb-4">Performance</h2>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Create a New Quiz</CardTitle>
-                            <CardDescription>Turn your notes into a quiz in seconds.</CardDescription>
+                            <CardTitle>Quiz Accuracy</CardTitle>
+                            <CardDescription>Your scores over the last 7 days.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Button className="w-full" asChild>
-                                <Link href="/create"><PlusCircle className="mr-2 size-4"/>Create Quiz</Link>
-                            </Button>
+                            <PerformanceChart />
                         </CardContent>
                     </Card>
                 </div>
