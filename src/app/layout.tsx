@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster"
+import { AuthProvider } from '@/components/auth-provider';
 
 const APP_NAME = "Jolt";
 const APP_DESCRIPTION = "Turn your study materials into quizzes instantly.";
@@ -21,6 +22,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
   themeColor: '#FFF9F5',
 };
 
@@ -45,8 +48,10 @@ export default function RootLayout({
           'font-body'
         )}
       >
-        {children}
-        <Toaster />
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
