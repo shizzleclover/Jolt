@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import Link from "next/link"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,7 +17,11 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useRouter } from "next/navigation"
+import { signIn, resendEmailVerification } from '@/lib/auth'
+import { useToast } from '@/hooks/use-toast'
+import { AlertCircle, Mail } from "lucide-react"
 
 const formSchema = z.object({
   email: z.string().email({
@@ -28,7 +33,12 @@ const formSchema = z.object({
 })
 
 export default function LoginPage() {
-  const router = useRouter();
+  const router = useRouter()
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
+  const [needsVerification, setNeedsVerification] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,10 +47,66 @@ export default function LoginPage() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    // TODO: Implement Firebase login
-    router.push('/dashboard');
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true)
+    
+    try {
+      const { user, error } = await signIn(values.email, values.password)
+
+      if (error) {
+        if (error.message.includes('Email not confirmed')) {
+          router.push(`/verify-otp?email=${encodeURIComponent(values.email)}`)
+          return
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Login failed',
+            description: error.message,
+          })
+        }
+        return
+      }
+
+      if (user) {
+        toast({
+          title: 'Welcome back!',
+          description: 'You have successfully signed in.',
+        })
+        router.push('/dashboard')
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'An error occurred',
+        description: 'Please try again later.',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function handleResendVerification() {
+    try {
+      const { error } = await resendEmailVerification(userEmail)
+      if (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Failed to resend email',
+          description: error.message,
+        })
+      } else {
+        toast({
+          title: 'Email sent!',
+          description: 'Please check your email for the verification link.',
+        })
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'An error occurred',
+        description: 'Please try again later.',
+      })
+    }
   }
 
   return (
@@ -50,6 +116,21 @@ export default function LoginPage() {
         <CardDescription>Enter your credentials to access your account.</CardDescription>
       </CardHeader>
       <CardContent>
+        {needsVerification && (
+          <Alert className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Your email address needs to be verified before you can sign in.{' '}
+              <button
+                onClick={handleResendVerification}
+                className="font-medium underline underline-offset-4 hover:no-underline"
+              >
+                Resend verification email
+              </button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -59,7 +140,7 @@ export default function LoginPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="you@example.com" {...field} />
+                    <Input type="email" placeholder="you@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -84,7 +165,9 @@ export default function LoginPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">Log In</Button>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Signing In...' : 'Log In'}
+            </Button>
           </form>
         </Form>
         <div className="mt-6 text-center text-sm text-muted-foreground">

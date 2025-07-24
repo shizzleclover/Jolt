@@ -8,53 +8,32 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { signUp, verifyEmailOtp, resendEmailVerification } from '@/lib/auth'
+import { resetPassword, verifyPasswordResetOtp } from '@/lib/auth'
 
-export default function SignUpPage() {
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [otpCode, setOtpCode] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [step, setStep] = useState<'signup' | 'verify'>('signup')
-  const [resendLoading, setResendLoading] = useState(false)
+  const [step, setStep] = useState<'email' | 'verify' | 'success'>('email')
   const router = useRouter()
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSendResetEmail = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    // Validate passwords match
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      setLoading(false)
-      return
-    }
-
-    // Validate password strength
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      setLoading(false)
-      return
-    }
-
     try {
-      const result = await signUp(email, password)
+      const result = await resetPassword(email)
       
       if (!result.success) {
-        setError(result.error?.message || 'Failed to create account')
+        setError(result.error?.message || 'Failed to send reset email')
         return
       }
 
-      if (result.needsVerification) {
-        router.push(`/verify-otp?email=${encodeURIComponent(email)}`)
-        return
-      } else {
-        // User is signed up and verified, redirect to dashboard
-        router.push('/dashboard')
-      }
+      setStep('verify')
     } catch (error) {
       setError('An unexpected error occurred')
     } finally {
@@ -62,10 +41,24 @@ export default function SignUpPage() {
     }
   }
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
+
+    // Validate passwords match
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
+
+    // Validate password strength
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters')
+      setLoading(false)
+      return
+    }
 
     if (!otpCode.trim()) {
       setError('Please enter the verification code')
@@ -74,15 +67,14 @@ export default function SignUpPage() {
     }
 
     try {
-      const result = await verifyEmailOtp(email, otpCode)
+      const result = await verifyPasswordResetOtp(email, otpCode, newPassword)
       
       if (!result.success) {
-        setError(result.error?.message || 'Invalid verification code')
+        setError(result.error?.message || 'Failed to reset password')
         return
       }
 
-      // Email verified successfully, redirect to dashboard
-      router.push('/dashboard')
+      setStep('success')
     } catch (error) {
       setError('An unexpected error occurred')
     } finally {
@@ -90,24 +82,49 @@ export default function SignUpPage() {
     }
   }
 
-  const handleResendCode = async () => {
-    setResendLoading(true)
-    setError('')
-
-    try {
-      const result = await resendEmailVerification(email)
-      
-      if (!result.success) {
-        setError(result.error?.message || 'Failed to resend verification code')
-      } else {
-        setError('') // Clear any previous errors
-        // Could show a success message here if desired
-      }
-    } catch (error) {
-      setError('An unexpected error occurred')
-    } finally {
-      setResendLoading(false)
-    }
+  if (step === 'success') {
+    return (
+      <div className="container relative h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+        <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
+          <div className="absolute inset-0 bg-zinc-900" />
+          <div className="relative z-20 flex items-center text-lg font-medium">
+            Jolt
+          </div>
+          <div className="relative z-20 mt-auto">
+            <blockquote className="space-y-2">
+              <p className="text-lg">
+                Your password has been successfully reset. You can now sign in with your new password.
+              </p>
+            </blockquote>
+          </div>
+        </div>
+        <div className="lg:p-8">
+          <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+            <Card>
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-2xl text-center">Password Reset Successful</CardTitle>
+                <CardDescription className="text-center">
+                  Your password has been updated successfully
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert>
+                  <AlertDescription>
+                    You can now sign in to your account using your new password.
+                  </AlertDescription>
+                </Alert>
+                <Button 
+                  onClick={() => router.push('/login')}
+                  className="w-full"
+                >
+                  Continue to Sign In
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (step === 'verify') {
@@ -121,7 +138,7 @@ export default function SignUpPage() {
           <div className="relative z-20 mt-auto">
             <blockquote className="space-y-2">
               <p className="text-lg">
-                Check your email for the verification code and enter it below to complete your account setup.
+                Enter the verification code sent to your email and create a new password.
               </p>
             </blockquote>
           </div>
@@ -130,13 +147,13 @@ export default function SignUpPage() {
           <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
             <Card>
               <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl text-center">Verify your email</CardTitle>
+                <CardTitle className="text-2xl text-center">Reset your password</CardTitle>
                 <CardDescription className="text-center">
-                  Enter the 6-digit code sent to {email}
+                  Enter the code sent to {email} and create a new password
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <form onSubmit={handleResetPassword} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="otpCode">Verification Code</Label>
                     <Input
@@ -147,6 +164,28 @@ export default function SignUpPage() {
                       onChange={(e) => setOtpCode(e.target.value)}
                       maxLength={6}
                       className="text-center text-lg tracking-widest"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      placeholder="Enter new password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm new password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                     />
                   </div>
@@ -162,25 +201,17 @@ export default function SignUpPage() {
                     className="w-full" 
                     disabled={loading}
                   >
-                    {loading ? 'Verifying...' : 'Verify Email'}
+                    {loading ? 'Resetting password...' : 'Reset Password'}
                   </Button>
                 </form>
               </CardContent>
-              <CardFooter className="flex flex-col space-y-2">
+              <CardFooter>
                 <Button
                   variant="link"
-                  onClick={handleResendCode}
-                  disabled={resendLoading}
-                  className="text-sm"
+                  onClick={() => setStep('email')}
+                  className="text-sm w-full"
                 >
-                  {resendLoading ? 'Sending...' : "Didn't receive the code? Resend"}
-                </Button>
-                <Button
-                  variant="link"
-                  onClick={() => setStep('signup')}
-                  className="text-sm"
-                >
-                  Back to sign up
+                  Back to email entry
                 </Button>
               </CardFooter>
             </Card>
@@ -200,7 +231,7 @@ export default function SignUpPage() {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              Join thousands of learners who are accelerating their knowledge with AI-powered learning.
+              Enter your email address and we'll send you a verification code to reset your password.
             </p>
           </blockquote>
         </div>
@@ -209,13 +240,13 @@ export default function SignUpPage() {
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <Card>
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl text-center">Create an account</CardTitle>
+              <CardTitle className="text-2xl text-center">Forgot your password?</CardTitle>
               <CardDescription className="text-center">
-                Enter your email below to create your account
+                Enter your email address below and we'll send you a verification code
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSignUp} className="space-y-4">
+              <form onSubmit={handleSendResetEmail} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -224,28 +255,6 @@ export default function SignUpPage() {
                     placeholder="name@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Create a password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
                 </div>
@@ -261,13 +270,13 @@ export default function SignUpPage() {
                   className="w-full" 
                   disabled={loading}
                 >
-                  {loading ? 'Creating account...' : 'Create account'}
+                  {loading ? 'Sending code...' : 'Send verification code'}
                 </Button>
               </form>
             </CardContent>
             <CardFooter>
               <div className="text-center text-sm text-muted-foreground w-full">
-                Already have an account?{' '}
+                Remember your password?{' '}
                 <Link href="/login" className="underline underline-offset-4 hover:text-primary">
                   Sign in
                 </Link>
@@ -278,4 +287,4 @@ export default function SignUpPage() {
       </div>
     </div>
   )
-}
+} 
