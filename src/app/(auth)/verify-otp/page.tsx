@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { verifyEmailOtp, resendEmailVerification } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
 
-export default function VerifyOtpPage() {
+function VerifyOtpInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { toast } = useToast()
@@ -61,5 +62,13 @@ export default function VerifyOtpPage() {
         Resend OTP
       </button>
     </div>
+  )
+}
+
+export default function VerifyOtpPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyOtpInner />
+    </Suspense>
   )
 }
