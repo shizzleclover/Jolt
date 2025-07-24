@@ -51,20 +51,12 @@ export default function LoginPage() {
     setIsLoading(true)
     
     try {
-      const { data, error } = await signIn({
-        email: values.email,
-        password: values.password,
-      })
+      const { user, error } = await signIn(values.email, values.password)
 
       if (error) {
         if (error.message.includes('Email not confirmed')) {
-          setUserEmail(values.email)
-          setNeedsVerification(true)
-          toast({
-            variant: 'destructive',
-            title: 'Email not verified',
-            description: 'Please verify your email before signing in.',
-          })
+          router.push(`/verify-otp?email=${encodeURIComponent(values.email)}`)
+          return
         } else {
           toast({
             variant: 'destructive',
@@ -75,7 +67,7 @@ export default function LoginPage() {
         return
       }
 
-      if (data.user) {
+      if (user) {
         toast({
           title: 'Welcome back!',
           description: 'You have successfully signed in.',
@@ -95,7 +87,7 @@ export default function LoginPage() {
 
   async function handleResendVerification() {
     try {
-      const { error } = await resendEmailVerification()
+      const { error } = await resendEmailVerification(userEmail)
       if (error) {
         toast({
           variant: 'destructive',

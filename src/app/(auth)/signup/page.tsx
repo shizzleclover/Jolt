@@ -49,7 +49,8 @@ export default function SignUpPage() {
       }
 
       if (result.needsVerification) {
-        setStep('verify')
+        router.push(`/verify-otp?email=${encodeURIComponent(email)}`)
+        return
       } else {
         // User is signed up and verified, redirect to dashboard
         router.push('/dashboard')
